@@ -1,0 +1,19 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Node.js
+node_modules/
+build/
+.env
+
+# Generated Music
+generated_music/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
