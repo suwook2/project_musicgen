@@ -1,0 +1,36 @@
+/* frontend/src/components/MusicGenerator.css */
+
+.music-generator-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.music-generator-form div {
+    margin-bottom: 10px;
+}
+
+.music-generator-form label {
+    font-weight: bold;
+}
+
+.music-generator-form input,
+.music-generator-form select,
+.music-generator-form textarea {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.music-generator-form button {
+    padding: 10px;
+    background-color: #36A2EB;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.music-generator-form button:disabled {
+    background-color: #a0c4e8;
+    cursor: not-allowed;
+}

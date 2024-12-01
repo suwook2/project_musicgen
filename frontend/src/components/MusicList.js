@@ -3,20 +3,24 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './MusicList.css';
+import GenreChart from './GenreChart'; // GenreChart 컴포넌트 임포트
 
-function MusicList() {
+function MusicList({ selectedUser }) {
   const [musics, setMusics] = useState([]);
   const [titleSearch, setTitleSearch] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'desc' });
+  const [genreData, setGenreData] = useState([]);
 
-  const fetchMusics = async (filters = { title: titleSearch }) => {
+  const fetchMusics = async () => {
     setLoading(true);
     setError('');
     try {
-      const params = {};
-      if (filters.title.trim() !== '') params.title = filters.title.trim();
+      const params = { user_id: selectedUser.user_id };
+      if (titleSearch.trim() !== '') {
+        params.title = titleSearch.trim();
+      }
 
       const response = await axios.get('http://localhost:5000/api/music', { params });
       setMusics(response.data);
@@ -28,9 +32,22 @@ function MusicList() {
     }
   };
 
+  const fetchGenreDistribution = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/users/${selectedUser.user_id}/genre_distribution`);
+      setGenreData(response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
-    fetchMusics();
-  }, []);
+    if (selectedUser) {
+      fetchMusics();
+      fetchGenreDistribution();
+    }
+    // eslint-disable-next-line
+  }, [selectedUser]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -39,7 +56,7 @@ function MusicList() {
 
   const handleReset = () => {
     setTitleSearch('');
-    fetchMusics({ title: '' });
+    fetchMusics();
   };
 
   const handleSort = (key) => {
@@ -57,6 +74,7 @@ function MusicList() {
       const response = await axios.delete(`http://localhost:5000/api/music/${music_id}`);
       alert(response.data.message);
       fetchMusics();
+      fetchGenreDistribution();
     } catch (err) {
       console.error(err);
       if (err.response && err.response.data && err.response.data.message) {
@@ -71,6 +89,11 @@ function MusicList() {
     let sortableMusics = [...musics];
     if (sortConfig !== null) {
       sortableMusics.sort((a, b) => {
+        if (sortConfig.key === 'genre_detail.name') {
+          if (a.genre_id < b.genre_id) return sortConfig.direction === 'asc' ? -1 : 1;
+          if (a.genre_id > b.genre_id) return sortConfig.direction === 'asc' ? 1 : -1;
+          return 0;
+        }
         if (a[sortConfig.key] < b[sortConfig.key]) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
@@ -84,8 +107,8 @@ function MusicList() {
   }, [musics, sortConfig]);
 
   return (
-    <div>
-      <h2>생성된 음악 목록</h2>
+    <div className="music-list-container">
+      <h2>{selectedUser.name}의 음악 목록</h2>
       <form onSubmit={handleSearch} className="search-form">
         <div>
           <label>제목 검색:</label>
@@ -99,9 +122,7 @@ function MusicList() {
         <button type="submit">검색</button>
         <button type="button" onClick={handleReset}>초기화</button>
       </form>
-      {loading && <p>음악 목록 로딩 중...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {!loading && !error && (
+      <div className="music-table-and-chart">
         <table>
           <thead>
             <tr>
@@ -111,8 +132,8 @@ function MusicList() {
               <th onClick={() => handleSort('title')}>
                 제목 {sortConfig.key === 'title' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
               </th>
-              <th onClick={() => handleSort('genre')}>
-                장르 {sortConfig.key === 'genre' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
+              <th onClick={() => handleSort('genre_detail.name')}>
+                장르 {sortConfig.key === 'genre_detail.name' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
               </th>
               <th onClick={() => handleSort('prompt')}>
                 프롬프트 {sortConfig.key === 'prompt' ? (sortConfig.direction === 'asc' ? '▲' : '▼') : ''}
@@ -130,7 +151,7 @@ function MusicList() {
               <tr key={music.music_id}>
                 <td>{music.created_at}</td>
                 <td>{music.title}</td>
-                <td>{music.genre}</td>
+                <td>{music.genre_id}</td>
                 <td>{music.prompt}</td>
                 <td>
                   <audio controls src={`http://localhost:5000${music.generated_audio_path}`}>
@@ -144,7 +165,11 @@ function MusicList() {
             ))}
           </tbody>
         </table>
-      )}
+        {/* 오른쪽에만 GenreChart를 렌더링 */}
+        <GenreChart genreData={genreData} />
+      </div>
+      {loading && <p>음악 목록 로딩 중...</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
 }

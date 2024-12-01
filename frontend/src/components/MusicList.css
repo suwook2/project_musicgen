@@ -1,48 +1,98 @@
 /* frontend/src/components/MusicList.css */
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-  }
-  
-  th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-  
-  th {
-    cursor: pointer;
-    background-color: #f2f2f2;
-  }
-  
-  th:hover {
-    background-color: #e2e2e2;
-  }
-  
-  .search-form {
+.music-list-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.search-form {
     display: flex;
     align-items: center;
-    gap: 10px;
     margin-top: 10px;
-  }
-  
-  .search-form input {
+}
+
+.search-form div {
+    margin-right: 10px;
+}
+
+.search-form label {
+    margin-right: 5px;
+}
+
+.search-form input {
     padding: 5px;
     width: 200px;
-  }
-  
-  .search-form button {
-    padding: 5px 10px;
-  }
-  
-  button {
-    padding: 5px 10px;
+}
+
+.music-table-and-chart {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    margin-top: 20px;
+}
+
+table {
+    width: 70%;
+    border-collapse: collapse;
+    margin-right: 20px;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
     cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #ddd;
-  }
-  
+    background-color: #f2f2f2;
+}
+
+th:nth-child(1) { /* 생성 날짜 */
+    width: 10%; /* 절반 크기로 조정 */
+}
+
+th:nth-child(5) { /* 재생 */
+    width: 25%; /* 재생 바 길이 늘리기 */
+}
+
+th:nth-child(6) { /* 삭제 */
+    width: 10%;
+}
+
+td:nth-child(1) { /* 생성 날짜 */
+    width: 10%;
+}
+
+td:nth-child(5) { /* 재생 */
+    width: 25%;
+}
+
+td:nth-child(6) { /* 삭제 */
+    width: 10%;
+}
+
+audio {
+    width: 100%;
+}
+
+button {
+    padding: 5px 10px;
+    background-color: #DC3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #c82333;
+}
+
+/* GenreChart 위치 및 크기 조정 */
+.genre-chart {
+    width: 150px; /* 10분의 1 크기로 조정 */
+    height: 150px;
+    position: relative;
+}

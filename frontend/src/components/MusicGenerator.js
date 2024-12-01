@@ -1,23 +1,48 @@
 // frontend/src/components/MusicGenerator.js
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './MusicGenerator.css';
 
-function MusicGenerator({ onMusicCreated }) {
+function MusicGenerator({ selectedUser, onMusicCreated }) {
   const [title, setTitle] = useState('');
-  const [genre, setGenre] = useState('');
+  const [genreId, setGenreId] = useState('');
+  const [genres, setGenres] = useState([]);
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // 장르 목록을 불러오는 함수
+  const fetchGenres = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/genres');
+      setGenres(response.data);
+      if (response.data.length > 0) {
+        setGenreId(response.data[0].genre_id); // 기본 선택값 설정
+      }
+    } catch (err) {
+      console.error(err);
+      setError('장르 목록을 불러오는 데 실패했습니다.');
+    }
+  };
+
+  useEffect(() => {
+    fetchGenres();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!selectedUser) {
+      setError('사용자를 먼저 선택해주세요.');
+      return;
+    }
     setLoading(true);
     setError('');
 
     const data = {
+      user_id: selectedUser.user_id,
       title,
-      genre,
+      genre_id: genreId,
       prompt,
     };
 
@@ -29,7 +54,7 @@ function MusicGenerator({ onMusicCreated }) {
       });
       alert(response.data.message);
       setTitle('');
-      setGenre('');
+      setGenreId(genres.length > 0 ? genres[0].genre_id : '');
       setPrompt('');
       if (onMusicCreated) {
         onMusicCreated();
@@ -49,7 +74,8 @@ function MusicGenerator({ onMusicCreated }) {
   return (
     <div>
       <h2>음악 생성</h2>
-      <form onSubmit={handleSubmit}>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <form onSubmit={handleSubmit} className="music-generator-form">
         <div>
           <label>저장할 제목:</label>
           <input
@@ -61,24 +87,27 @@ function MusicGenerator({ onMusicCreated }) {
         </div>
         <div>
           <label>장르:</label>
-          <select value={genre} onChange={(e) => setGenre(e.target.value)} required>
-            <option value="">장르 선택</option>
-            <option value="Pop">Pop</option>
-            <option value="Rock">Rock</option>
-            <option value="Jazz">Jazz</option>
-            <option value="Classical">Classical</option>
-            <option value="Hip-Hop">Hip-Hop</option>
+          <select
+            value={genreId}
+            onChange={(e) => setGenreId(e.target.value)}
+            required
+          >
+            {genres.map((genre) => (
+              <option key={genre.genre_id} value={genre.genre_id}>
+                {genre.name}
+              </option>
+            ))}
           </select>
         </div>
         <div>
-          <label>프롬프트 (분위기, 사용할 악기를 영어로 입력하세요):</label>
+          <label>프롬프트 (분위기, 사용할 악기 등):</label>
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             required
+            placeholder="예: Happy mood with guitar and drums"
           ></textarea>
         </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit" disabled={loading}>
           {loading ? '생성 중...' : '음악 생성'}
         </button>

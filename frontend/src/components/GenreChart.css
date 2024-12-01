@@ -1,0 +1,20 @@
+/* frontend/src/components/GenreChart.css */
+
+.genre-chart {
+    width: 150px; /* 10분의 1 크기로 조정 */
+    height: 150px;
+    position: relative;
+}
+
+.genre-chart h3 {
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.no-music-label {
+    text-align: center;
+    color: #666666;
+    font-size: 12px;
+    margin-top: 10px;
+}
